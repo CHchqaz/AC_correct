@@ -320,7 +320,7 @@ def test1():
 
 
 OUTPUT_GRAPH = False
-MAX_EP_STEPS = 10000 # default value = 200
+MAX_EP_STEPS = 1000 # default value = 200
 GAMMA = 0.9
 LR_A = 0.001  # learning rate for actor
 LR_C = 0.01  # learning rate for critic

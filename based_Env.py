@@ -39,7 +39,7 @@ class envh:
         # Data flow on each link
         linkFlow = np.array([2, 1, 0.5, 2.125])       #4条链路的额定流量
         sigma = 0.1
-        p_max = 11
+        p_max = 10
         aq = 0.8
 
         lamda1 = 18;    lamda2 = 14;     lamda3 = 16
@@ -62,8 +62,8 @@ class envh:
         # self.action = tf.clip_by_value(self.multi_dist.sample(1), action_bound[0], action_bound[1])
         p_value[0] = np.clip(p_value[0], p_bound[0], p_max)
         p_value[1] = np.clip(p_value[1], p_bound[1], p_max)
-        p_value[2] = np.clip(p_value[2], p_bound[2], p_max)
-        p_value[3] = np.clip(p_value[3], p_bound[3], p_max)
+        p_value[2] = np.clip(p_value[2]+y2*aq, p_bound[2], p_max)
+        p_value[3] = np.clip(p_value[3]+y1*aq, p_bound[3], p_max)
 
         if p1 <= 5.3 or p2 <=0.63 or p3 <= 0.17 or p4<=6.9:
             reward=-1000
@@ -72,23 +72,22 @@ class envh:
             reward = sum(linkFlow / (capLink - linkFlow))
         #reward = linkFlow / (capLink - linkFlow)                       #优化目标，使reward的总和值最小
 
-        # if reward/250>0.2:
-        #     done=False
+
         # Node 1
         self.eh1 = np.random.poisson(lamda1)
         #print('step中的eh1=', self.eh1)
-        B_1 = max(min(B_1 + self.eh1 - (p1 + p2) * self.Ts+(y1+y2)*aq , self.Bmax),0)
+        B_1 = max(min(B_1 + self.eh1 - (p1 + p2) * self.Ts-y1 , self.Bmax),0)
         #print('step中的B1=', newB_1)
         # Node 2
         self.eh2 = np.random.poisson(lamda2)
 
         #print('step中的eh2', self.eh2)
-        B_2 = max(min(B_2 + self.eh2 - p3 * self.Ts-y1 , self.Bmax),0)
+        B_2 = max(min(B_2 + self.eh2 - p3 * self.Ts+y2*aq , self.Bmax),0)
         #print('step中的B2=', newB_2)
         # Node 3
         self.eh3 = np.random.poisson(lamda3)
         #print('step中的eh3', self.eh3)
-        B_3 = max(min(B_3 + self.eh3 - p4 * self.Ts-y2 , self.Bmax),0)
+        B_3 = max(min(B_3 + self.eh3 - p4 * self.Ts-y2+y1*aq , self.Bmax),0)
         #print('step中的B3=', newB_3)
 
         # if  -reward<-30 or newB_1 == 0 or newB_2 == 0 or newB_3 == 0 or \
